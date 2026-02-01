@@ -36,6 +36,7 @@ public class Theme
   public Theme(Context context, AttributeSet attrs)
   {
     getKeyFont(context); // _key_font will be accessed
+    getFont(context);
     TypedArray s = context.getTheme().obtainStyledAttributes(attrs, R.styleable.keyboard, 0, 0);
     colorKey = s.getColor(R.styleable.keyboard_colorKey, 0);
     colorKeyActivated = s.getColor(R.styleable.keyboard_colorKeyActivated, 0);
@@ -43,7 +44,7 @@ public class Theme
     colorNavBar = s.getColor(R.styleable.keyboard_navigationBarColor, 0);
     isLightNavBar = s.getBoolean(R.styleable.keyboard_windowLightNavigationBar, false);
     labelColor = s.getColor(R.styleable.keyboard_colorLabel, 0);
-    activatedColor = s.getColor(R.styleable.keyboard_colorLabelActivated, 0);
+    activatedColor = 0xFF40e0d0; // s.getColor(R.styleable.keyboard_colorLabelActivated, 0);
     lockedColor = s.getColor(R.styleable.keyboard_colorLabelLocked, 0);
     subLabelColor = s.getColor(R.styleable.keyboard_colorSubLabel, 0);
     secondaryLabelColor = adjustLight(labelColor,
@@ -79,6 +80,7 @@ public class Theme
     return (paint);
   }
 
+  static Typeface _font = null;
   static Typeface _key_font = null;
 
   static public Typeface getKeyFont(Context context)
@@ -86,6 +88,13 @@ public class Theme
     if (_key_font == null)
       _key_font = Typeface.createFromAsset(context.getAssets(), "special_font.ttf");
     return _key_font;
+  }
+
+  static public Typeface getFont(Context context)
+  {
+    if (_font == null)
+      _font = Typeface.createFromAsset(context.getAssets(), "font.ttf");
+    return _font;
   }
 
   public static final class Computed
@@ -155,9 +164,9 @@ public class Theme
         border_top_paint = init_border_paint(config, border_width, theme.keyBorderColorTop);
         border_right_paint = init_border_paint(config, border_width, theme.keyBorderColorRight);
         border_bottom_paint = init_border_paint(config, border_width, theme.keyBorderColorBottom);
-        _label_paint = init_label_paint(config, null);
+        _label_paint = init_label_paint(config, _font);
         _special_label_paint = init_label_paint(config, _key_font);
-        _sublabel_paint = init_label_paint(config, null);
+        _sublabel_paint = init_label_paint(config, _font);
         _special_sublabel_paint = init_label_paint(config, _key_font);
         _label_alpha_bits = (config.labelBrightness & 0xFF) << 24;
       }

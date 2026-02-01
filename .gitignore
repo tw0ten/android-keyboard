@@ -8,6 +8,6 @@
 .DS_Store
 /captures
 /build
-# Directory _build is not used anymore
-/_build
 /release
+
+/assets/font.ttf
