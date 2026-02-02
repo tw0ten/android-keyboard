@@ -37,6 +37,7 @@
           ANDROID_SDK_ROOT = "${androidSdk.androidsdk}/libexec/android-sdk";
 
           shellHook = ''
+            # export RELEASE_KEYSTORE='debug.keystore' RELEASE_KEYSTORE_PASSWORD='debug0' RELEASE_KEY_ALIAS='debug' RELEASE_KEY_PASSWORD='debug0'
           '';
         };
       });

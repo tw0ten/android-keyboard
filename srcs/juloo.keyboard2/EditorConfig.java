@@ -83,7 +83,7 @@ public final class EditorConfig
     initial_sel_start = info.initialSelStart;
     initial_sel_end = info.initialSelEnd;
     /* Suggestions */
-    should_show_candidates_view = CandidatesView.should_show(info);
+    should_show_candidates_view = false; // CandidatesView.should_show(info);
   }
 
   String actionLabel_of_imeAction(int action, Resources res)
