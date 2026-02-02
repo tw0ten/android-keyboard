@@ -8,6 +8,8 @@ import android.util.TypedValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import juloo.cdict.Cdict;
+import juloo.keyboard2.dict.Dictionaries;
 import juloo.keyboard2.prefs.CustomExtraKeysPreference;
 import juloo.keyboard2.prefs.ExtraKeysPreference;
 import juloo.keyboard2.prefs.LayoutsPreference;
@@ -42,6 +44,7 @@ public final class Config
   public boolean number_row_symbols;
   public float swipe_dist_px;
   public float slide_step_px;
+  public boolean suggestions_enabled;
   // Let the system handle vibration when false.
   public boolean vibrate_custom;
   // Control the vibration if [vibrate_custom] is true.
@@ -50,7 +53,7 @@ public final class Config
   public long longPressInterval;
   public boolean keyrepeat_enabled;
   public float margin_bottom;
-  public int keyboardHeightPercent;
+  public int keyboard_rows_height_pixels;
   public int screenHeightPixels;
   public float horizontal_margin;
   public float key_vertical_margin;
@@ -75,13 +78,12 @@ public final class Config
   // Dynamically set
   /** Configuration options implied by the connected editor. */
   public EditorConfig editor_config;
-  public boolean should_show_candidates_view;
   public boolean shouldOfferVoiceTyping;
   public ExtraKeys extra_keys_subtype;
   public Map<KeyValue, KeyboardData.PreferredPos> extra_keys_param;
   public Map<KeyValue, KeyboardData.PreferredPos> extra_keys_custom;
-
-  public final IKeyEventHandler handler;
+  public Cdict current_dictionary = null; // Might be 'null'.
+  public IKeyEventHandler handler;
   public boolean orientation_landscape = false;
   public boolean foldable_unfolded = false;
   public boolean wide_screen = false;
@@ -90,7 +92,8 @@ public final class Config
   int current_layout_narrow;
   int current_layout_wide;
 
-  private Config(SharedPreferences prefs, Resources res, IKeyEventHandler h, Boolean foldableUnfolded)
+  private Config(SharedPreferences prefs, Resources res,
+      Boolean foldableUnfolded, Dictionaries dicts)
   {
     _prefs = prefs;
     editor_config = new EditorConfig();
@@ -100,18 +103,16 @@ public final class Config
     labelTextSize = 0.33f;
     sublabelTextSize = 0.22f;
     // from prefs
-    refresh(res, foldableUnfolded);
+    refresh(res, foldableUnfolded, dicts);
     // initialized later
-    should_show_candidates_view = false;
     shouldOfferVoiceTyping = false;
     extra_keys_subtype = null;
-    handler = h;
   }
 
   /*
    ** Reload prefs
    */
-  public void refresh(Resources res, Boolean foldableUnfolded)
+  public void refresh(Resources res, Boolean foldableUnfolded, Dictionaries dicts)
   {
     DisplayMetrics dm = res.getDisplayMetrics();
     orientation_landscape = res.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
@@ -120,6 +121,7 @@ public final class Config
     float characterSizeScale = 1.f;
     String show_numpad_s = _prefs.getString("show_numpad", "never");
     show_numpad = "always".equals(show_numpad_s);
+    int keyboardHeightPercent;
     if (orientation_landscape)
     {
       if ("landscape".equals(show_numpad_s))
@@ -136,6 +138,7 @@ public final class Config
     String number_row = _prefs.getString("number_row", "no_number_row");
     add_number_row = !number_row.equals("no_number_row");
     number_row_symbols = number_row.equals("symbols");
+    suggestions_enabled = _prefs.getBoolean("suggestions", true);
     // The baseline for the swipe distance correspond to approximately the
     // width of a key in portrait mode, as most layouts have 10 columns.
     // Multipled by the DPI ratio because most swipes are made in the diagonals.
@@ -165,6 +168,12 @@ public final class Config
     customBorderRadius = _prefs.getInt("custom_border_radius", 0) / 100.f;
     customBorderLineWidth = get_dip_pref(dm, "custom_border_line_width", 0);
     screenHeightPixels = dm.heightPixels;
+    // Rows height is proportional to the screen height, meaning it doesn't
+    // change for layouts with more or less rows. 3.95 is the usual height of
+    // a layout in KeyboardData unit. The keyboard will be higher if the layout
+    // has more rows and smaller if it has less because rows stay the same
+    // height.
+    keyboard_rows_height_pixels = screenHeightPixels * keyboardHeightPercent / 395;
     horizontal_margin =
       get_dip_pref_oriented(dm, "horizontal_margin", 3, 28);
     double_tap_lock_shift = _prefs.getBoolean("lock_double_tap", false);
@@ -282,10 +291,10 @@ public final class Config
   private static Config _globalConfig = null;
 
   public static void initGlobalConfig(SharedPreferences prefs, Resources res,
-      IKeyEventHandler handler, Boolean foldableUnfolded)
+      Boolean foldableUnfolded, Dictionaries dicts)
   {
     migrate(prefs);
-    _globalConfig = new Config(prefs, res, handler, foldableUnfolded);
+    _globalConfig = new Config(prefs, res, foldableUnfolded, dicts);
     LayoutModifier.init(_globalConfig, res);
   }
 

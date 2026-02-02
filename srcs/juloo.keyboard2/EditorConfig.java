@@ -5,7 +5,7 @@ import android.os.Build.VERSION;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.inputmethod.EditorInfo;
-import juloo.keyboard2.CandidatesView;
+import juloo.keyboard2.suggestions.CandidatesView;
 
 public final class EditorConfig
 {
@@ -83,7 +83,7 @@ public final class EditorConfig
     initial_sel_start = info.initialSelStart;
     initial_sel_end = info.initialSelEnd;
     /* Suggestions */
-    should_show_candidates_view = false; // CandidatesView.should_show(info);
+    should_show_candidates_view = CandidatesView.should_show(info);
   }
 
   String actionLabel_of_imeAction(int action, Resources res)
