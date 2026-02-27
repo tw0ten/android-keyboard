@@ -45,7 +45,7 @@ public class Theme
     colorNavBar = s.getColor(R.styleable.keyboard_navigationBarColor, 0);
     isLightNavBar = s.getBoolean(R.styleable.keyboard_windowLightNavigationBar, false);
     labelColor = s.getColor(R.styleable.keyboard_colorLabel, 0);
-    activatedColor = s.getColor(R.styleable.keyboard_colorLabelActivated, 0);
+    activatedColor = 0xff40e0d0;
     pressedColor = s.getColor(R.styleable.keyboard_colorLabelPressed, labelColor);
     lockedColor = s.getColor(R.styleable.keyboard_colorLabelLocked, 0);
     subLabelColor = s.getColor(R.styleable.keyboard_colorSubLabel, 0);
